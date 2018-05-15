@@ -1,0 +1,7 @@
+geocoder
+geopy
+unidecode
+pandas
+tqdm
+numpy
+seaborn
