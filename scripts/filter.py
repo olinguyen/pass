@@ -10,20 +10,19 @@ if __name__ == "__main__":
     #tweets_df = pd.read_csv('./data/tweets_with_id.csv', encoding='utf8', sep='\t', index_col=0)
     tweets_df = DataAccess.get_as_dataframe(explode=False)
 
-
-    with open('./books.txt') as f:
+    with open('./keywords/books.txt') as f:
         lines = f.readlines()
 
     lines = [line.replace('\n', '').lower() for line in lines]
     movies = '|\s(' + '|'.join(lines) + ')'
 
-    with open('./sports.txt') as f:
+    with open('./keywords/sports.txt') as f:
         lines = f.readlines()
 
     lines = [line.replace('\n', '').lower() for line in lines]
     outdoors = '|\s(' + '|'.join(lines) + ')'
 
-    with open('./nosleep.txt') as f:
+    with open('./keywords/nosleep.txt') as f:
         lines = f.readlines()
 
     lines = [line.replace('\n', '').lower() for line in lines]

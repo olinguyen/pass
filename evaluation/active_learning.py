@@ -16,7 +16,7 @@ if __name__ == '__main__':
     ensemble_models = []
 
     for indicator in ensemble_indicators:
-        with open('./model/%s.pkl' % indicator, 'rb') as f:
+        with open('./models/%s.pkl' % indicator, 'rb') as f:
             clf = dill.load(f)
             ensemble_models.append((clf, indicator))
 

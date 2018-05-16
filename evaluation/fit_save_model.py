@@ -48,7 +48,7 @@ if __name__ == "__main__":
                 classifier.fit(X_train, y_train)
 
             filename = indicator + '_%s_latest.pkl' % name
-            path = os.path.join('./model', filename)
+            path = os.path.join('./models', filename)
             dill.dump(classifier, open(path, 'wb'))
             print("...wrote to", path)
 

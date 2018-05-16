@@ -31,9 +31,12 @@ def get_baseline_model():
                                                    random_state=42),
                                                    param_grid=params))])
 
-def get_ensemble_model():
+def get_ensemble_model(w2v=None):
+    if not w2v:
+        w2v = get_glove_w2v()
+
     return Pipeline([
-            ('feature_extraction', get_features()),
+            ('feature_extraction', get_features(w2v)),
             ('feature_selection', SelectFpr(f_classif)), # false positive rate test for feature selection
 
 

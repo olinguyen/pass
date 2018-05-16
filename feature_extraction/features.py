@@ -20,8 +20,9 @@ def get_glove_w2v(glove_path=GLOVE_DIR):
     print('Found %s word vectors.' % len(w2v))
     return w2v
 
-def get_features():
-    w2v = get_glove_w2v()
+def get_features(w2v=None):
+    if not w2v:
+        w2v = get_glove_w2v()
     return FeatureUnion([
                 # Average length of word in a sentence
                 ('avg_word_len', AverageWordLengthExtractor()),
