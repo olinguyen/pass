@@ -8,5 +8,6 @@ def get_feature_extractor(w2v=None):
         w2v = get_glove_w2v()
 
     return Pipeline([("feature_extraction", get_features(w2v)),
-                     ('feature_selection', SelectFpr(f_classif))])
+                     ('feature_selection', SelectFpr(f_classif))
+                   ])
 

@@ -7,6 +7,11 @@ from sklearn.linear_model.base import LinearClassifierMixin, SparseCoefMixin, Cl
 from sklearn.svm import LinearSVC
 from sklearn.linear_model import LogisticRegression
 from sklearn.utils.validation import check_X_y, check_is_fitted
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import classification_report, roc_auc_score
+
+from database.utils import get_train_test_data
 
 
 __all__ = ['NBSVM', 'NbSvmClassifier', 'NBFeaturer']
@@ -116,14 +121,23 @@ class NBFeaturer(BaseEstimator, ClassifierMixin):
         return (p + self.alpha) / ((y == y_i).sum() + self.alpha)
 
 if __name__ == "__main__":
-    tfidf = TfidfVectorizer(ngram_range=(1, 2), tokenizer=tokenize, 
-                            min_df=3, max_df=0.9, strip_accents='unicode', 
+    tfidf = TfidfVectorizer(ngram_range=(1, 2),
+#tokenizer=tokenize,
+                            min_df=3, max_df=0.9, strip_accents='unicode',
                             use_idf=1, smooth_idf=1, sublinear_tf=1)
     nbf = NBFeaturer(alpha=10)
     model = LogisticRegression(C=4, dual=True)
+    train_test_data = get_train_test_data()
 
     p = pipeline = Pipeline([
         ('tfidf', tfidf),
         ('nbf', nbf),
         ('lr', model)
     ])
+
+    for X_train, y_train, X_test, y_test, indicator in train_test_data:
+        p.fit(X_train, y_train)
+        y_scores_test = p.predict_proba(X_test)       # Predicted probabilities
+        roc_auc = roc_auc_score(y_test, y_scores_test[:, 1])
+
+        print(indicator, roc_auc)
