@@ -4,6 +4,9 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from collections import Counter, defaultdict
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+from sklearn.utils.metaestimators import _BaseComposition
+
+
 class TextCleanExtractor(BaseEstimator, TransformerMixin):
     def __init__(self):
         self.T = tokenizer.TweetTokenizer(preserve_handles=False,
@@ -78,7 +81,7 @@ class NumUniqueWordExtractor(BaseEstimator, TransformerMixin):
     def get_params(self, deep=True):
         return dict()
 
-class ProbExtractor(BaseEstimator, TransformerMixin):
+class ProbExtractor(_BaseComposition, BaseEstimator, TransformerMixin):
 
     def __init__(self, models):
         self.models = models
@@ -97,7 +100,10 @@ class ProbExtractor(BaseEstimator, TransformerMixin):
         return self
 
     def get_params(self, deep=True):
-        return dict()
+        return dict(models=self.models)
+
+    def set_params(self, **kwargs):
+        return self
 
 class MeanEmbeddingVectorizer(object):
     def __init__(self, word2vec):
@@ -121,7 +127,7 @@ class MeanEmbeddingVectorizer(object):
 
 # and a tf-idf version of the same
 class TfidfEmbeddingVectorizer(object):
-    def __init__(self, word2vec):
+    def __init__(self, word2vec, tfidf=None):
 
         self.word2vec = word2vec
         self.word2weight = None
@@ -129,24 +135,25 @@ class TfidfEmbeddingVectorizer(object):
             self.dim = len(next(iter(self.word2vec.values())))
         else:
             self.dim = 0
-        self.tfidf = None
+        self.tfidf = tfidf
 
 
     def fit(self, X, y):
-        tfidf = TfidfVectorizer(#ngram_range=(1,4),
-                                lowercase=True,
-                                analyzer='word',
-                                #tokenizer=tokenize,
-                                #stop_words='english'
-                                )
-        tfidf.fit(X)
+        if self.tfidf is None:
+            self.tfidf = TfidfVectorizer(#ngram_range=(1,4),
+                                    lowercase=True,
+                                    analyzer='word',
+                                    #tokenizer=tokenize,
+                                    #stop_words='english'
+                                    )
+        #self.tfidf.fit(X)
         # if a word was never seen - it must be at least as infrequent
         # as any of the known words - so the default idf is the max of
         # known idf's
-        max_idf = max(tfidf.idf_)
+        max_idf = max(self.tfidf.idf_)
         self.word2weight = defaultdict(
             lambda: max_idf,
-            [(w, tfidf.idf_[i]) for w, i in tfidf.vocabulary_.items()])
+            [(w, self.tfidf.idf_[i]) for w, i in self.tfidf.vocabulary_.items()])
 
         return self
 

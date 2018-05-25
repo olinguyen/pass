@@ -35,6 +35,7 @@ def get_ensemble_model(w2v=None):
     if not w2v:
         w2v = get_glove_w2v()
 
+    n_jobs = -1
     return Pipeline([
             ('feature_extraction', get_features(w2v)),
             ('feature_selection', SelectFpr(f_classif)), # false positive rate test for feature selection
@@ -43,17 +44,17 @@ def get_ensemble_model(w2v=None):
             ('proba', ProbExtractor([RandomForestClassifier(n_estimators=300,
                                                             max_depth=10,
                                                             min_samples_split=5,
-                                                            n_jobs=-1),
+                                                            n_jobs=n_jobs),
                                     ExtraTreesClassifier(n_estimators=300,max_depth=10,
                                                          min_samples_split=10,
-                                                         n_jobs=-1),
+                                                         n_jobs=n_jobs),
                                     XGBClassifier(n_estimators=300,
                                                   max_depth=10,
-                                                  n_jobs=-1),
+                                                  n_jobs=8),
                                     LogisticRegression(C=0.1,
                                                        solver='lbfgs',
                                                        penalty='l2',
-                                                       n_jobs=-1),
+                                                       n_jobs=n_jobs),
                                     BernoulliNB(alpha=5.0)])),
 
             ('polynomial', PolynomialFeatures(degree=2)),

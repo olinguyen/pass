@@ -27,11 +27,12 @@ def get_train_test_data(clean=True, merge=False):
     test_sb['clean_text'] = cleaner.transform(test_sb.clean_text)
 
     if merge:
+        cols = ['label_pa', 'label_sb', 'label_sleep']
         train = pd.concat((train_sleep, train_sb, train_pa), ignore_index=True, sort=False)
         train = train.fillna(0)
         test = pd.concat((test_sleep, test_sb, test_pa), ignore_index=True, sort=False)
         test = test.fillna(0)
-        return train['clean_text'], train.loc[:, ['label_pa', 'label_sb', 'label_sleep']], test['clean_text'], test.loc[:, ['label_pa', 'label_sb', 'label_sleep']],
+        return train['clean_text'], train.loc[:, cols], test['clean_text'], test.loc[:, cols],
 
     data = [(train_sleep['clean_text'], train_sleep['label_sleep'], test_sleep['clean_text'], test_sleep['label_sleep'], 'sleep'),
             (train_sb['clean_text'], train_sb['label_sb'], test_sb['clean_text'], test_sb['label_sb'], 'sedentary_behaviour'),

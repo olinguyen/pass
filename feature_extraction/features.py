@@ -28,7 +28,8 @@ def get_glove_w2v(glove_path=GLOVE_DIR):
 
 def get_features(w2v=None):
     tfidf_words = TfidfVectorizer(ngram_range=(1,4),
-                           lowercase=False,
+                           max_features=5000,
+                           lowercase=True,
                            tokenizer=nltk_tokenizer.tokenize,
                            stop_words='english',
                            min_df=3,
@@ -38,6 +39,7 @@ def get_features(w2v=None):
                            sublinear_tf=True)
 
     tfidf_chars = TfidfVectorizer(ngram_range=(1,4),
+                           max_features=5000,
                            lowercase=False,
                            analyzer='char',
                            min_df=3,
@@ -60,9 +62,7 @@ def get_features(w2v=None):
                 # Number of unique words used
                 ('num_unique', NumUniqueWordExtractor()),
 
-                # Averaged word embedding, weighted by tfidf
-                ('w2v', TfidfEmbeddingVectorizer(w2v)),
-
+                # Naive bayes tfidf features
                 ("tfidf_nbf", Pipeline([
                     ("wc_tfidf", FeatureUnion([
                           # TF-IDF over tokens
@@ -71,8 +71,13 @@ def get_features(w2v=None):
                           ('tfidf_token_chars', tfidf_chars)])),
 
                     ("nbf", NBFeaturer(alpha=10))
-                ]))
+                ])),
 
+                # Averaged word embedding, weighted by tfidf
+                ('w2v', TfidfEmbeddingVectorizer(w2v, tfidf_words))
+
+                # Averaged word embedding
+                #('w2v', MeanEmbeddingVectorizer(w2v))
             ])
 
 if __name__ == "__main__":
