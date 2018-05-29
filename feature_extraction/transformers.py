@@ -4,8 +4,6 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from collections import Counter, defaultdict
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from sklearn.utils.metaestimators import _BaseComposition
-
 
 class TextCleanExtractor(BaseEstimator, TransformerMixin):
     def __init__(self):
@@ -81,7 +79,7 @@ class NumUniqueWordExtractor(BaseEstimator, TransformerMixin):
     def get_params(self, deep=True):
         return dict()
 
-class ProbExtractor(_BaseComposition, BaseEstimator, TransformerMixin):
+class ProbExtractor(BaseEstimator, TransformerMixin):
 
     def __init__(self, models):
         self.models = models
