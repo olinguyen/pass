@@ -10,6 +10,7 @@ from sklearn.preprocessing import PolynomialFeatures
 from xgboost import XGBClassifier
 
 from feature_extraction.features import *
+from nlp.embeddings import get_glove_w2v
 
 params = {'C': [0.001, 0.01, 0.1, 1, 10, 100, 1000]}
 

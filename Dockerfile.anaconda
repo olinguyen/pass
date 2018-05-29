@@ -1,0 +1,64 @@
+FROM continuumio/anaconda3
+
+LABEL maintainer="Olivier Nguyen <nguyenolive@gmail.com>"
+
+ENV PASSWORD ''
+
+RUN apt-get update && apt-get install -y libgtk2.0-dev libav-tools && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    conda update -n base conda -y && \
+    conda config --add channels conda-forge
+
+# Install Python 3 packages
+RUN conda install --quiet --yes \
+    jupyter numpy matplotlib pandas keras xgboost \
+    'scipy=1.0*' \
+    'seaborn=0.8*' \
+    'scikit-learn=0.19*' \
+    'cython=0.28*' \
+    'statsmodels=0.8*' \
+    'dill=0.2*' \
+    'sqlalchemy=1.2*' \
+    'hdf5=1.10*' \
+    'h5py=2.7*' \
+    'beautifulsoup4=4.6.*' \
+    'protobuf=3.*' \
+    'tensorflow=1.7.0' \
+    'nltk=3.*' \
+    'xlrd'  && \
+    conda remove --quiet --yes --force qt pyqt && \
+    conda clean -tipsy && \
+    rm -rf $CONDA_DIR/share/jupyter/lab/staging && \
+    rm -rf /home/$NB_USER/.cache/yarn && \
+    rm -rf /home/$NB_USER/.node-gyp
+
+
+RUN curl -O https://bootstrap.pypa.io/get-pip.py && \
+    python get-pip.py && \
+    rm get-pip.py
+
+# Install Twitter tokenizer
+RUN	pip install git+https://github.com/erikavaris/tokenizer.git
+
+COPY jupyter_notebook_config.py /root/.jupyter/
+COPY run_jupyter.sh /
+
+RUN ["mkdir", "pass"]
+COPY . /pass
+ 
+###
+### start up the server
+###
+EXPOSE 8888 6006
+
+WORKDIR /pass/notebooks
+#CMD ["/run_jupyter.sh", "--ip=0.0.0.0", "--allow-root"]
+CMD ["/run_jupyter.sh", "--allow-root"]
+
+### Usage
+#docker build -t pass .
+#docker run -p 127.0.0.1:8888:8888 --name pass -t pass
+#docker stop pass
+#docker rm pass
+#docker stop pass; docker rm pass; docker build -t pass .; docker run -p 127.0.0.1:8888:8888 --name pass -t pass

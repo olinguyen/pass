@@ -1,7 +1,8 @@
-from feature_extraction.features import get_features, get_glove_w2v
 from sklearn.pipeline import Pipeline
 from sklearn.feature_selection import SelectFpr, f_classif
 
+from feature_extraction.features import get_features
+from nlp.embeddings import get_glove_w2v
 
 def get_feature_extractor(w2v=None):
     if not w2v:
