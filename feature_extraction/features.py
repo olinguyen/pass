@@ -4,7 +4,7 @@ from feature_extraction.nbsvm import NBFeaturer
 from nltk.tokenize import TweetTokenizer
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.feature_extraction.text import TfidfVectorizer
-from nlp.embeddings import get_glove_w2v
+from nlp.glove import Glove
 
 nltk_tokenizer = TweetTokenizer(strip_handles=True, reduce_len=True, preserve_case=False)
 
@@ -30,7 +30,9 @@ def get_features(w2v=None):
                            sublinear_tf=True)
 
     if not w2v:
-        w2v = get_glove_w2v()
+        glove = Glove.load()
+        w2v = glove.get_dict()
+
     return FeatureUnion([
                 # Average length of word in a sentence
                 ('avg_word_len', AverageWordLengthExtractor()),

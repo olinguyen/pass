@@ -30,9 +30,9 @@ def get_train_test_data(clean=True, merge=False):
 
     if merge:
         cols = ['label_pa', 'label_sb', 'label_sleep']
-        train = pd.concat((train_sleep, train_sb, train_pa), ignore_index=True)#, sort=False)
+        train = pd.concat((train_sleep, train_sb, train_pa), ignore_index=True, sort=False)
         train = train.fillna(0)
-        test = pd.concat((test_sleep, test_sb, test_pa), ignore_index=True)#, sort=False)
+        test = pd.concat((test_sleep, test_sb, test_pa), ignore_index=True, sort=False)
         test = test.fillna(0)
         return train['clean_text'], train.loc[:, cols], test['clean_text'], test.loc[:, cols],
 

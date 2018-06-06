@@ -7,10 +7,10 @@ from nlp.embeddings import WordEmbedding
 from database.utils import get_train_test_data
 
 GLOVE_DIR = "/media/data/glove/glove.6B"
-GLOVE_DIR = "/home/vmadmin/hdbc/glove"
 GLOVE_DIR = "/home/olivier/glove/glove.6B"
-GLOVE_FILENAME = "glove.twitter.27B.200d.txt"
+GLOVE_DIR = "/home/vmadmin/hdbc/glove"
 GLOVE_FILENAME = "glove.6B.50d.txt"
+GLOVE_FILENAME = "glove.twitter.27B.200d.txt"
 
 class Glove(WordEmbedding):
     def __init__(self):
@@ -20,7 +20,7 @@ class Glove(WordEmbedding):
     def load(cls, path=None):
         instance = Glove()
         if path is None:
-           path = GLOVE_DIR 
+           path = GLOVE_DIR
 
         w2v = {}
         embedding_filename = os.path.join(path, GLOVE_FILENAME)
@@ -34,7 +34,7 @@ class Glove(WordEmbedding):
 
         instance.__dict__ = w2v
         print('Found %s word vectors.' % len(w2v))
-        return instance 
+        return instance
 
     def get_embedding_matrix(self, tokenizer, max_features=20000, embed_size=200):
         all_embs = np.stack(self.__dict__.values())

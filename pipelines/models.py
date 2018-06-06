@@ -10,7 +10,7 @@ from sklearn.preprocessing import PolynomialFeatures
 from xgboost import XGBClassifier
 
 from feature_extraction.features import *
-from nlp.embeddings import get_glove_w2v
+from nlp.glove import Glove
 
 params = {'C': [0.001, 0.01, 0.1, 1, 10, 100, 1000]}
 
@@ -34,7 +34,8 @@ def get_baseline_model():
 
 def get_ensemble_model(w2v=None):
     if not w2v:
-        w2v = get_glove_w2v()
+        glove = Glove.load()
+        w2v = glove.get_dict()
 
     n_jobs = -1
     return Pipeline([

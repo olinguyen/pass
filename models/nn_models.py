@@ -1,17 +1,18 @@
 from keras.layers import Dense, Input, LSTM, Embedding, Dropout, Activation, Flatten, concatenate
 from keras.layers import Bidirectional, GlobalMaxPool1D, Convolution1D, MaxPooling1D
 from keras.models import Model, Sequential
-from embeddings.embeddings import get_embedding_matrix
+from nlp.glove import Glove
 
 def get_lstm_model(embedding_matrix=None, maxlen=75):
 
     if embedding_matrix is None:
-        embedding_matrix = get_embedding_matrix()
+        print("Need to pass embedding matrix")
+        return
 
     embed_size = embedding_matrix.shape[1]
 
     inp = Input(shape=(maxlen,))
-    x = Embedding(input_dim=len(embedding_matrix), output_dim=embed_size, weights=[embedding_matrix])(inp)
+    x = Embedding(input_dim=len(embedding_matrix), output_dim=embed_size, weights=[embedding_matrix], trainable=False)(inp)
     x = Bidirectional(LSTM(50, return_sequences=True, dropout=0.1, recurrent_dropout=0.1))(x)
     x = GlobalMaxPool1D()(x)
     x = Dense(50, activation="relu")(x)
@@ -24,7 +25,8 @@ def get_lstm_model(embedding_matrix=None, maxlen=75):
 
 def get_cnn_model(embedding_matrix, maxlen=75):
     if embedding_matrix is None:
-        embedding_matrix = get_embedding_matrix()
+        print("Need to pass embedding matrix")
+        return
 
     embed_size = embedding_matrix.shape[1]
 

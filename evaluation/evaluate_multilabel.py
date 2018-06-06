@@ -10,6 +10,7 @@ from database.utils import get_labeled_data, get_train_test_data
 from pipelines.feature_extractor import get_feature_extractor
 from pipelines.models import get_ensemble_model
 from evaluation.metrics import class_report
+from nlp.glove import Glove
 
 
 from copy import deepcopy
@@ -25,9 +26,12 @@ if __name__ == "__main__":
 
     Xr_train, y_train, Xr_test, y_test = get_train_test_data(merge=True)
 
-    ensemble = get_ensemble_model()
+    glove = Glove.load()
+    w2v = glove.get_dict()
+
+    ensemble = get_ensemble_model(w2v)
     ensemble.steps = ensemble.steps[2:]
-    feature_extractor = get_feature_extractor()
+    feature_extractor = get_feature_extractor(w2v)
 
     models = [("lr", OneVsRestClassifier(LogisticRegression(C=0.1, penalty='l2', solver='lbfgs', n_jobs=-1))),
               ("nb", OneVsRestClassifier(BernoulliNB(alpha=5.0))),
