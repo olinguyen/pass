@@ -29,12 +29,12 @@ if __name__ == "__main__":
     feature_extractor = get_feature_extractor()
 
     models = [("lr", LogisticRegression(C=0.1, penalty='l2', solver='lbfgs', n_jobs=-1)),
-               ("nb", BernoulliNB(alpha=5.0)),
-               ("rf", RandomForestClassifier(n_estimators=300, max_depth=10, min_samples_split=5, n_jobs=-1)),
-               ("xgb", XGBClassifier(n_estimators=300, max_depth=8, n_jobs=-1)),
-               ("et", ExtraTreesClassifier(n_estimators=300, max_depth=10, min_samples_split=10, n_jobs=-1)),
-               ("svm", SVC(C=100, gamma=0.0001, probability=True)),
-               ("ensemble", ensemble)]
+              ("nb", BernoulliNB(alpha=5.0)),
+              ("rf", RandomForestClassifier(n_estimators=300, max_depth=10, min_samples_split=5, n_jobs=-1)),
+              ("xgb", XGBClassifier(n_estimators=300, max_depth=8, n_jobs=-1)),
+              ("et", ExtraTreesClassifier(n_estimators=300, max_depth=10, min_samples_split=10, n_jobs=-1)),
+              ("svm", SVC(C=100, gamma=0.0001, probability=True)),
+              ("ensemble", ensemble)]
 
     results = {}
 
@@ -64,24 +64,28 @@ if __name__ == "__main__":
 
                 train_times.append(te - ts)
 
-                y_pprobs = clf.predict_proba(X_val)       # Predicted probabilities
-                y_plabs = np.squeeze(clf.predict(X_val))  # Predicted class labels
+                # Predicted probabilities
+                y_pprobs = clf.predict_proba(X_val)
+                y_plabs = np.squeeze(
+                    clf.predict(X_val))  # Predicted class labels
 
                 scores.append(roc_auc_score(y_val, y_pprobs[:, 1]))
                 confusion = confusion_matrix(y_val, y_plabs)
                 conf_mat += confusion
 
                 # Collect indices of false positive and negatives
-                fp_i = np.where((y_plabs==1) & (y_val==0))[0]
-                fn_i = np.where((y_plabs==0) & (y_val==1))[0]
+                fp_i = np.where((y_plabs == 1) & (y_val == 0))[0]
+                fn_i = np.where((y_plabs == 0) & (y_val == 1))[0]
                 false_pos.update(val_i[fp_i])
                 false_neg.update(val_i[fn_i])
 
             classifier.fit(X_train, y_train)
             y_scores_test = classifier.predict_proba(X_test)
-            results[indicator][name]['test_roc_auc'] = roc_auc_score(y_test, y_scores_test[:, 1])
+            results[indicator][name]['test_roc_auc'] = roc_auc_score(
+                y_test, y_scores_test[:, 1])
 
-            print("\n[%s][%s] Mean score: %0.2f (+/- %0.2f)" % (indicator, name, np.mean(scores), np.std(scores) * 2))
+            print("\n[%s][%s] Mean score: %0.2f (+/- %0.2f)" %
+                  (indicator, name, np.mean(scores), np.std(scores) * 2))
 
             if name == 'ensemble':
                 filename = indicator + '_ensemble_latest.pkl'

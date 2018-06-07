@@ -33,7 +33,7 @@ if __name__ == "__main__":
               ("et", ExtraTreesClassifier(n_estimators=300, max_depth=10, min_samples_split=10, n_jobs=-1)),
               ("svm", SVC(C=100, gamma=0.0001, probability=True)),
               ("ensemble", ensemble),
-             ]
+              ]
 
     results = {}
 
@@ -69,12 +69,14 @@ if __name__ == "__main__":
                 train_times.append(te - ts)
 
                 ts = time.time()
-                y_pprobs = clf.predict_proba(X_val)       # Predicted probabilities
+                # Predicted probabilities
+                y_pprobs = clf.predict_proba(X_val)
                 te = time.time()
 
                 predict_times.append(te - ts)
 
-                y_plabs = np.squeeze(clf.predict(X_val))  # Predicted class labels
+                y_plabs = np.squeeze(
+                    clf.predict(X_val))  # Predicted class labels
 
                 scores.append(roc_auc_score(y_val, y_pprobs[:, 1]))
 
@@ -82,8 +84,8 @@ if __name__ == "__main__":
                 conf_mat += confusion
 
                 # Collect indices of false positive and negatives
-                fp_i = np.where((y_plabs==1) & (y_val==0))[0]
-                fn_i = np.where((y_plabs==0) & (y_val==1))[0]
+                fp_i = np.where((y_plabs == 1) & (y_val == 0))[0]
+                fn_i = np.where((y_plabs == 0) & (y_val == 1))[0]
                 false_pos.update(val_i[fp_i])
                 false_neg.update(val_i[fn_i])
 
@@ -93,7 +95,9 @@ if __name__ == "__main__":
             test_roc_auc = roc_auc_score(y_test, y_scores_test[:, 1])
             results[label][name]['test_roc_auc'] = test_roc_auc
 
-            print("\n[%s][%s] 5-fold CV Mean score: %0.2f (+/- %0.2f)" % (label, name, mean_roc_auc, np.std(scores) * 2))
+            print(
+                "\n[%s][%s] 5-fold CV Mean score: %0.2f (+/- %0.2f)" %
+                (label, name, mean_roc_auc, np.std(scores) * 2))
             print("\n[%s][%s] Test score: %0.2f" % (label, name, test_roc_auc))
 
             #conf_mat /= 5

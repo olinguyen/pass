@@ -2,8 +2,10 @@
 logs/
 
 # data files
+data/
 *.csv
-*.tsv
+*.csv
+*.bak
 
 # Pickled objects
 *.pkl

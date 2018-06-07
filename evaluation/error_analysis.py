@@ -30,7 +30,11 @@ if __name__ == '__main__':
 
     for _, _, X_test, y_test, indicator in train_test_data:
         results[indicator] = {}
-        index = [indicator for _, indicator in ensemble_models].index(indicator + "_ensemble_latest")
+        index = [
+            indicator for _,
+            indicator in ensemble_models].index(
+            indicator +
+            "_ensemble_latest")
         clf = ensemble_models[index][0]
         y_proba = clf.predict_proba(X_test)
         y_pred = clf.predict(X_test)
@@ -46,5 +50,9 @@ if __name__ == '__main__':
         false_pos = (result.y_pred == 1) & (result.y_true == 0)
         false_neg = (result.y_pred == 0) & (result.y_true == 1)
 
-        result.loc[false_neg].to_csv('./results/%s_false_neg.csv' % indicator, index=False, sep='\t')
-        result.loc[false_pos].to_csv('./results/%s_false_pos.csv' % indicator, index=False, sep='\t')
+        result.loc[false_neg].to_csv(
+            './results/%s_false_neg.csv' %
+            indicator, index=False, sep='\t')
+        result.loc[false_pos].to_csv(
+            './results/%s_false_pos.csv' %
+            indicator, index=False, sep='\t')

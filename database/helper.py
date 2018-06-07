@@ -37,8 +37,10 @@ class ExplodingRecordJoiner(BaseEstimator, TransformerMixin):
             X = X.join(sub)
             del X[col]
 
-        X['latitude'] = X['geo.coordinates'].apply(lambda x: x[0] if x else None)
-        X['longitude'] = X['geo.coordinates'].apply(lambda x: x[1] if x else None)
+        X['latitude'] = X['geo.coordinates'].apply(
+            lambda x: x[0] if x else None)
+        X['longitude'] = X['geo.coordinates'].apply(
+            lambda x: x[1] if x else None)
         del X['geo.coordinates']
         return X
 
@@ -50,14 +52,14 @@ class ExplodingRecordJoiner(BaseEstimator, TransformerMixin):
         return "ExplodingRecordJoiner({})".format(", ".join(st))
 
 ready_made_exploder = ExplodingRecordJoiner(
-    user = [
+    user=[
         'created_at',
         'favourites_count',
         'followers_count',
         'friends_count',
         'statuses_count',
         'verified'],
-    place = ['full_name', 'country'],
-    geo = ['coordinates'],
-    entities = ['hashtags']
+    place=['full_name', 'country'],
+    geo=['coordinates'],
+    entities=['hashtags']
 )

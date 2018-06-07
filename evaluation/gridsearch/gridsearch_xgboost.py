@@ -17,7 +17,7 @@ parameters = {"n_estimators": [100, 200, 300, 400],
 
 if __name__ == "__main__":
     print("Running grid search for logistic regression on parameters: %s" %
-      parameters)
+          parameters)
 
     train_test_data = get_train_test_data()
     feature_extractor = get_feature_extractor()
@@ -27,19 +27,23 @@ if __name__ == "__main__":
             y_trues.extend(y_true)
             y_preds.extend(y_pred)
             #print(classification_report(y_true, y_pred))
-            return roc_auc_score(y_true, y_pred) # return accuracy score
+            return roc_auc_score(y_true, y_pred)  # return accuracy score
 
         ts = time.time()
         xgb = XGBClassifier()
 
         X_feats = feature_extractor.fit_transform(Xr_train, y_train)
 
-        cv = GridSearchCV(xgb,
-                  param_grid=parameters,
-                  cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=42),
-                  refit=True,
-                  scoring='roc_auc',
-                  n_jobs=-1)
+        cv = GridSearchCV(
+            xgb,
+            param_grid=parameters,
+            cv=StratifiedKFold(
+                n_splits=5,
+                shuffle=True,
+                random_state=42),
+            refit=True,
+            scoring='roc_auc',
+            n_jobs=-1)
 
         cv.fit(X_feats, y_train)
         te = time.time()
@@ -54,9 +58,16 @@ if __name__ == "__main__":
         print("Detailed classification report across 5 folds:")
         print()
 
-        cross_val_score(cv, X_feats, y_train,
-                        cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=42),
-                        scoring=make_scorer(classification_report_with_auc_score), n_jobs=8)
+        cross_val_score(
+            cv,
+            X_feats,
+            y_train,
+            cv=StratifiedKFold(
+                n_splits=5,
+                shuffle=True,
+                random_state=42),
+            scoring=make_scorer(classification_report_with_auc_score),
+            n_jobs=8)
 
         print(classification_report(y_trues, y_preds))
         print()

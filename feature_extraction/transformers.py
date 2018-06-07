@@ -6,6 +6,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 class TextCleanExtractor(BaseEstimator, TransformerMixin):
+
     def __init__(self):
         self.T = tokenizer.TweetTokenizer(preserve_handles=False,
                                           preserve_url=False,
@@ -20,14 +21,17 @@ class TextCleanExtractor(BaseEstimator, TransformerMixin):
         return self
 
     def get_params(self, deep=True):
-        return dict(T = self.T)
+        return dict(T=self.T)
+
 
 class NumWordExtractor(BaseEstimator, TransformerMixin):
+
     def __init__(self):
         pass
 
     def transform(self, X):
-        return np.array([len(sentence.split()) for sentence in X]).reshape(-1, 1)
+        return np.array([len(sentence.split())
+                         for sentence in X]).reshape(-1, 1)
 
     def fit(self, X, y):
         return self
@@ -35,7 +39,9 @@ class NumWordExtractor(BaseEstimator, TransformerMixin):
     def get_params(self, deep=True):
         return dict()
 
+
 class AverageWordLengthExtractor(BaseEstimator, TransformerMixin):
+
     def __init__(self):
         pass
 
@@ -44,7 +50,8 @@ class AverageWordLengthExtractor(BaseEstimator, TransformerMixin):
         return np.mean([len(word) for word in text])
 
     def transform(self, X):
-        return np.array([self.average_word_length(sentence.split()) for sentence in X]).reshape(-1, 1)
+        return np.array([self.average_word_length(sentence.split())
+                         for sentence in X]).reshape(-1, 1)
 
     def fit(self, X, y):
         return self
@@ -52,7 +59,9 @@ class AverageWordLengthExtractor(BaseEstimator, TransformerMixin):
     def get_params(self, deep=True):
         return dict()
 
+
 class CharLengthExtractor(BaseEstimator, TransformerMixin):
+
     def __init__(self):
         pass
 
@@ -67,17 +76,20 @@ class CharLengthExtractor(BaseEstimator, TransformerMixin):
 
 
 class NumUniqueWordExtractor(BaseEstimator, TransformerMixin):
+
     def __init__(self):
         pass
 
     def transform(self, X):
-        return np.array([len(Counter(sentence.split())) for sentence in X]).reshape(-1, 1)
+        return np.array([len(Counter(sentence.split()))
+                         for sentence in X]).reshape(-1, 1)
 
     def fit(self, X, y):
         return self
 
     def get_params(self, deep=True):
         return dict()
+
 
 class ProbExtractor(BaseEstimator, TransformerMixin):
 
@@ -103,7 +115,9 @@ class ProbExtractor(BaseEstimator, TransformerMixin):
     def set_params(self, **kwargs):
         return self
 
+
 class MeanEmbeddingVectorizer(object):
+
     def __init__(self, word2vec):
         self.word2vec = word2vec
         # if a text is empty we should return a vector of zeros
@@ -124,7 +138,10 @@ class MeanEmbeddingVectorizer(object):
         return dict()
 
 # and a tf-idf version of the same
+
+
 class TfidfEmbeddingVectorizer(object):
+
     def __init__(self, word2vec, tfidf=None):
 
         self.word2vec = word2vec
@@ -135,36 +152,34 @@ class TfidfEmbeddingVectorizer(object):
             self.dim = 0
         self.tfidf = tfidf
 
-
     def fit(self, X, y):
         if self.tfidf is None:
-            self.tfidf = TfidfVectorizer(#ngram_range=(1,4),
-                                    lowercase=True,
-                                    analyzer='word',
-                                    #tokenizer=tokenize,
-                                    #stop_words='english'
-                                    )
-        #self.tfidf.fit(X)
+            self.tfidf = TfidfVectorizer(  # ngram_range=(1,4),
+                lowercase=True,
+                analyzer='word',
+                # tokenizer=tokenize,
+                # stop_words='english'
+            )
+        # self.tfidf.fit(X)
         # if a word was never seen - it must be at least as infrequent
         # as any of the known words - so the default idf is the max of
         # known idf's
         max_idf = max(self.tfidf.idf_)
         self.word2weight = defaultdict(
-            lambda: max_idf,
-            [(w, self.tfidf.idf_[i]) for w, i in self.tfidf.vocabulary_.items()])
+            lambda: max_idf, [
+                (w, self.tfidf.idf_[i]) for w, i in self.tfidf.vocabulary_.items()])
 
         return self
 
     def transform(self, X):
         return np.array([
-                np.mean([self.word2vec[w] * self.word2weight[w]
-                         for w in sentence.split() if w in self.word2vec] or
-                         [np.zeros(self.dim)], axis=0)
-                         for sentence in X])
-
+            np.mean([self.word2vec[w] * self.word2weight[w]
+                     for w in sentence.split() if w in self.word2vec] or
+                    [np.zeros(self.dim)], axis=0)
+            for sentence in X])
 
     def get_params(self, deep=True):
-        return dict(word2vec = self.word2vec)
+        return dict(word2vec=self.word2vec)
 
 if __name__ == '__main__':
     wl = NumUniqueWordExtractor()
@@ -178,4 +193,3 @@ if __name__ == '__main__':
     cleaner = TextCleanExtractor()
     out = cleaner.transform(["hello @world, this is #olivier!!!!!!$$#$# #$#"])
     print(out)
-

@@ -16,6 +16,7 @@ from database.utils import get_train_test_data
 
 __all__ = ['NBSVM', 'NbSvmClassifier', 'NBFeaturer']
 
+
 class NBSVM(BaseEstimator, LinearClassifierMixin, SparseCoefMixin):
 
     def __init__(self, alpha=1, C=1, beta=0.25, fit_intercept=False):
@@ -42,7 +43,7 @@ class NBSVM(BaseEstimator, LinearClassifierMixin, SparseCoefMixin):
     def _fit_binary(self, X, y):
         p = np.asarray(self.alpha + X[y == 1].sum(axis=0)).flatten()
         q = np.asarray(self.alpha + X[y == 0].sum(axis=0)).flatten()
-        r = np.log(p/np.abs(p).sum()) - np.log(q/np.abs(q).sum())
+        r = np.log(p / np.abs(p).sum()) - np.log(q / np.abs(q).sum())
         b = np.log((y == 1).sum()) - np.log((y == 0).sum())
 
         if isinstance(X, spmatrix):
@@ -61,17 +62,19 @@ class NBSVM(BaseEstimator, LinearClassifierMixin, SparseCoefMixin):
             max_iter=10000
         ).fit(X_scaled, y)
 
-        mean_mag =  np.abs(lsvc.coef_).mean()
+        mean_mag = np.abs(lsvc.coef_).mean()
 
         coef_ = (1 - self.beta) * mean_mag * r + \
-                self.beta * (r * lsvc.coef_)
+            self.beta * (r * lsvc.coef_)
 
         intercept_ = (1 - self.beta) * mean_mag * b + \
-                     self.beta * lsvc.intercept_
+            self.beta * lsvc.intercept_
 
         return coef_, intercept_
 
+
 class NbSvmClassifier(BaseEstimator, ClassifierMixin):
+
     def __init__(self, C=1.0, dual=False, n_jobs=1):
         self.C = C
         self.dual = dual
@@ -93,15 +96,22 @@ class NbSvmClassifier(BaseEstimator, ClassifierMixin):
         x, y = check_X_y(x, y, accept_sparse=True)
 
         def pr(x, y_i, y):
-            p = x[y==y_i].sum(0)
-            return (p+1) / ((y==y_i).sum()+1)
+            p = x[y == y_i].sum(0)
+            return (p + 1) / ((y == y_i).sum() + 1)
 
-        self._r = csr_matrix(np.log(pr(x,1,y) / pr(x,0,y)))
+        self._r = csr_matrix(np.log(pr(x, 1, y) / pr(x, 0, y)))
         x_nb = x.multiply(self._r)
-        self._clf = LogisticRegression(C=self.C, dual=self.dual, n_jobs=self.n_jobs).fit(x_nb, y)
+        self._clf = LogisticRegression(
+            C=self.C,
+            dual=self.dual,
+            n_jobs=self.n_jobs).fit(
+            x_nb,
+            y)
         return self
 
+
 class NBFeaturer(BaseEstimator, ClassifierMixin):
+
     def __init__(self, alpha):
         self.alpha = alpha
 
@@ -122,7 +132,7 @@ class NBFeaturer(BaseEstimator, ClassifierMixin):
 
 if __name__ == "__main__":
     tfidf = TfidfVectorizer(ngram_range=(1, 2),
-#tokenizer=tokenize,
+                            # tokenizer=tokenize,
                             min_df=3, max_df=0.9, strip_accents='unicode',
                             use_idf=1, smooth_idf=1, sublinear_tf=1)
     nbf = NBFeaturer(alpha=10)

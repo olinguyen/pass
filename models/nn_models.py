@@ -3,6 +3,7 @@ from keras.layers import Bidirectional, GlobalMaxPool1D, Convolution1D, MaxPooli
 from keras.models import Model, Sequential
 from nlp.glove import Glove
 
+
 def get_lstm_model(embedding_matrix=None, maxlen=75):
 
     if embedding_matrix is None:
@@ -12,16 +13,29 @@ def get_lstm_model(embedding_matrix=None, maxlen=75):
     embed_size = embedding_matrix.shape[1]
 
     inp = Input(shape=(maxlen,))
-    x = Embedding(input_dim=len(embedding_matrix), output_dim=embed_size, weights=[embedding_matrix], trainable=False)(inp)
-    x = Bidirectional(LSTM(50, return_sequences=True, dropout=0.1, recurrent_dropout=0.1))(x)
+    x = Embedding(
+        input_dim=len(embedding_matrix),
+        output_dim=embed_size,
+        weights=[embedding_matrix],
+        trainable=False)(inp)
+    x = Bidirectional(
+        LSTM(
+            50,
+            return_sequences=True,
+            dropout=0.1,
+            recurrent_dropout=0.1))(x)
     x = GlobalMaxPool1D()(x)
     x = Dense(50, activation="relu")(x)
     x = Dropout(0.1)(x)
     x = Dense(3, activation="sigmoid")(x)
     model = Model(inputs=inp, outputs=x)
-    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model.compile(
+        loss='binary_crossentropy',
+        optimizer='adam',
+        metrics=['accuracy'])
 
     return model
+
 
 def get_cnn_model(embedding_matrix, maxlen=75):
     if embedding_matrix is None:
@@ -33,7 +47,11 @@ def get_cnn_model(embedding_matrix, maxlen=75):
     graph_in = Input(shape=(maxlen, embed_size))
     convs = []
     for fsz in range(1, 4):
-        conv = Convolution1D(filters=300, kernel_size=fsz, padding='valid', activation='relu')(graph_in)
+        conv = Convolution1D(
+            filters=300,
+            kernel_size=fsz,
+            padding='valid',
+            activation='relu')(graph_in)
         pool = MaxPooling1D(pool_size=2)(conv)
         flatten = Flatten()(pool)
         convs.append(flatten)

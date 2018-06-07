@@ -9,6 +9,7 @@ import pandas as pd
 
 
 class RocAucEvaluation(Callback):
+
     def __init__(self, validation_data=(), interval=1):
         super(Callback, self).__init__()
 
@@ -19,17 +20,22 @@ class RocAucEvaluation(Callback):
         if epoch % self.interval == 0:
             y_pred = self.model.predict(self.X_val, verbose=0)
             score = roc_auc_score(self.y_val, y_pred, average='weighted')
-            print("\n ROC-AUC - epoch: %d - score: %.6f \n" % (epoch+1, score))
+            print(
+                "\n ROC-AUC - epoch: %d - score: %.6f \n" %
+                (epoch + 1, score))
+
 
 def class_report(conf_mat):
     tp, fp, fn, tn = conf_mat.flatten()
     measures = {}
     measures['accuracy'] = (tp + tn) / (tp + fp + fn + tn)
     measures['specificity'] = tn / (tn + fp)        # (true negative rate)
-    measures['sensitivity'] = tp / (tp + fn)        # (recall, true positive rate)
+    # (recall, true positive rate)
+    measures['sensitivity'] = tp / (tp + fn)
     measures['precision'] = tp / (tp + fp)
-    measures['f1score'] = 2*tp / (2*tp + fp + fn)
+    measures['f1score'] = 2 * tp / (2 * tp + fp + fn)
     return measures
+
 
 def class_report_multilabel(y_test, y_scores, verbose=True):
     if isinstance(y_test, pd.core.frame.DataFrame):
@@ -59,7 +65,8 @@ def class_report_multilabel(y_test, y_scores, verbose=True):
         roc_auc[i] = auc(fpr[i], tpr[i])
         precision[i], recall[i], _ = precision_recall_curve(y_test[:, i],
                                                             y_scores[:, i])
-        average_precision[i] = average_precision_score(y_test[:, i], y_scores[:, i])
+        average_precision[i] = average_precision_score(
+            y_test[:, i], y_scores[:, i])
 
         if verbose:
             print("ROC AUC for class %d: %.2f" % (i, roc_auc[i]))
@@ -71,8 +78,8 @@ def class_report_multilabel(y_test, y_scores, verbose=True):
     test_roc_auc = roc_auc_score(y_test, y_scores, average='weighted')
 
     # A "micro-average": quantifying score on all classes jointly
-    precision["micro"], recall["micro"], _ = precision_recall_curve(y_test.ravel(),
-        y_scores.ravel())
+    precision["micro"], recall["micro"], _ = precision_recall_curve(
+        y_test.ravel(), y_scores.ravel())
     average_precision["micro"] = average_precision_score(y_test, y_scores,
                                                          average="micro")
 
@@ -83,8 +90,9 @@ def class_report_multilabel(y_test, y_scores, verbose=True):
     measures['test_roc_auc'] = test_roc_auc
 
     if verbose:
-        print('Average precision score, micro-averaged over all classes: {0:0.2f}'
-              .format(average_precision["micro"]))
+        print(
+            'Average precision score, micro-averaged over all classes: {0:0.2f}' .format(
+                average_precision["micro"]))
         print("Test score: %0.2f\n" % (test_roc_auc))
 
     return measures, tpr, fpr, roc_auc

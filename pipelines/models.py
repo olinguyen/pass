@@ -14,23 +14,27 @@ from nlp.glove import Glove
 
 params = {'C': [0.001, 0.01, 0.1, 1, 10, 100, 1000]}
 
+
 def get_baseline_model():
     return Pipeline([
-                ('feature_extraction', TfidfVectorizer(ngram_range=(1,4),
-                                                       lowercase=False,
-                                                       tokenizer=nltk_tokenizer.tokenize,#LemmaTokenizerSpacy(allowed_postags=['NOUN', 'ADJ', 'ADV']),
-                                                       stop_words='english',
-                                                       min_df=3,
-                                                       max_df=0.9,
-                                                       strip_accents='unicode',
-                                                       use_idf=True,
-                                                       sublinear_tf=True
-                                                      )),
-                ('feature_selection', SelectFpr(f_classif)), # false positive rate test for feature selection
-                ('logistic_regression', GridSearchCV(
-                                LogisticRegression(penalty='l2',
-                                                   random_state=42),
-                                                   param_grid=params))])
+        ('feature_extraction', TfidfVectorizer(ngram_range=(1, 4),
+                                               lowercase=False,
+                                               tokenizer=nltk_tokenizer.tokenize,
+                                               # LemmaTokenizerSpacy(allowed_postags=['NOUN', 'ADJ', 'ADV']),
+                                               stop_words='english',
+                                               min_df=3,
+                                               max_df=0.9,
+                                               strip_accents='unicode',
+                                               use_idf=True,
+                                               sublinear_tf=True
+                                               )),
+        # false positive rate test for feature selection
+        ('feature_selection', SelectFpr(f_classif)),
+        ('logistic_regression', GridSearchCV(
+            LogisticRegression(penalty='l2',
+                                       random_state=42),
+            param_grid=params))])
+
 
 def get_ensemble_model(w2v=None):
     if not w2v:
@@ -39,32 +43,33 @@ def get_ensemble_model(w2v=None):
 
     n_jobs = -1
     return Pipeline([
-            ('feature_extraction', get_features(w2v)),
-            ('feature_selection', SelectFpr(f_classif)), # false positive rate test for feature selection
+        ('feature_extraction', get_features(w2v)),
+        # false positive rate test for feature selection
+        ('feature_selection', SelectFpr(f_classif)),
 
 
-            ('proba', ProbExtractor([RandomForestClassifier(n_estimators=300,
-                                                            max_depth=10,
-                                                            min_samples_split=5,
-                                                            n_jobs=n_jobs),
-                                    ExtraTreesClassifier(n_estimators=300,max_depth=10,
-                                                         min_samples_split=10,
-                                                         n_jobs=n_jobs),
-                                    XGBClassifier(n_estimators=300,
-                                                  max_depth=10,
-                                                  n_jobs=8),
-                                    LogisticRegression(C=0.1,
-                                                       solver='lbfgs',
-                                                       penalty='l2',
-                                                       n_jobs=n_jobs),
-                                    BernoulliNB(alpha=5.0)])),
+        ('proba', ProbExtractor([RandomForestClassifier(n_estimators=300,
+                                                        max_depth=10,
+                                                        min_samples_split=5,
+                                                        n_jobs=n_jobs),
+                                 ExtraTreesClassifier(n_estimators=300, max_depth=10,
+                                                      min_samples_split=10,
+                                                      n_jobs=n_jobs),
+                                 XGBClassifier(n_estimators=300,
+                                               max_depth=10,
+                                               n_jobs=8),
+                                 LogisticRegression(C=0.1,
+                                                    solver='lbfgs',
+                                                    penalty='l2',
+                                                    n_jobs=n_jobs),
+                                 BernoulliNB(alpha=5.0)])),
 
-            ('polynomial', PolynomialFeatures(degree=2)),
+        ('polynomial', PolynomialFeatures(degree=2)),
 
-            ('logistic_regression', GridSearchCV(
-                        LogisticRegression(penalty='l2',
-                                           random_state=42),
-                                           param_grid=params))])
+        ('logistic_regression', GridSearchCV(
+            LogisticRegression(penalty='l2',
+                               random_state=42),
+            param_grid=params))])
 
 if __name__ == "__main__":
-  print("Pipelines...")
+    print("Pipelines...")

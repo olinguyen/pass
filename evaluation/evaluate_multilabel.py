@@ -47,8 +47,8 @@ if __name__ == "__main__":
                                                               min_samples_split=10,
                                                               n_jobs=-1))),
               ("ensemble", OneVsRestClassifier(ensemble)),
-               #("svm", SVC(C=100, gamma=0.0001, probability=True)),
-             ]
+              #("svm", SVC(C=100, gamma=0.0001, probability=True)),
+              ]
 
     results = {}
 

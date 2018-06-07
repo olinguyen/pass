@@ -10,11 +10,11 @@ from pipelines.feature_extractor import get_feature_extractor
 
 import time
 
-parameters = {"C" : [0.01, 0.1, 1.0, 10.0, 100.0]}
+parameters = {"C": [0.01, 0.1, 1.0, 10.0, 100.0]}
 
 if __name__ == "__main__":
     print("Running grid search for logistic regression on parameters: %s" %
-      parameters)
+          parameters)
 
     data = get_labeled_data()
     feature_extractor = get_feature_extractor()
@@ -25,20 +25,24 @@ if __name__ == "__main__":
             y_trues.extend(y_true)
             y_preds.extend(y_pred)
             #print(classification_report(y_true, y_pred))
-            return roc_auc_score(y_true, y_pred) # return accuracy score
+            return roc_auc_score(y_true, y_pred)  # return accuracy score
 
         ts = time.time()
         lr = LogisticRegression(penalty='l2',
-            solver='lbfgs')
+                                solver='lbfgs')
 
         X_feats = feature_extractor.fit_transform(X, y)
 
-        cv = GridSearchCV(lr,
-                  param_grid=parameters,
-                  cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=42),
-                  refit=True,
-                  scoring='roc_auc',
-                  n_jobs=-1)
+        cv = GridSearchCV(
+            lr,
+            param_grid=parameters,
+            cv=StratifiedKFold(
+                n_splits=5,
+                shuffle=True,
+                random_state=42),
+            refit=True,
+            scoring='roc_auc',
+            n_jobs=-1)
 
         cv.fit(X_feats, y)
         te = time.time()
@@ -53,9 +57,15 @@ if __name__ == "__main__":
         print("Detailed classification report across 5 folds:")
         print()
 
-        cross_val_score(cv, X_feats, y,
-                        cv=StratifiedKFold(n_splits=5, shuffle=True, random_state=42),
-                        scoring=make_scorer(classification_report_with_auc_score))
+        cross_val_score(
+            cv,
+            X_feats,
+            y,
+            cv=StratifiedKFold(
+                n_splits=5,
+                shuffle=True,
+                random_state=42),
+            scoring=make_scorer(classification_report_with_auc_score))
 
         print(classification_report(y_trues, y_preds))
         print()

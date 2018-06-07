@@ -11,6 +11,7 @@ from database.helper import ready_made_exploder
 client = pymongo.MongoClient()
 col = client['tweets']['december']
 
+
 def union(*dtts):
     result = {}
     for d in dtts:
@@ -25,6 +26,7 @@ def project(*attributes, prefix=None):
 
 def exists(label, e=True):
     return {label: {"$exists": e}}
+
 
 class Projections:
     """
@@ -60,7 +62,17 @@ class Projections:
     )
 
     #all = union(text, hashtags, place, geo, place)
-    all = union(text, time, user, labels, language, hashtags, geo, place, retweeted)
+    all = union(
+        text,
+        time,
+        user,
+        labels,
+        language,
+        hashtags,
+        geo,
+        place,
+        retweeted)
+
 
 class Queries:
     """
@@ -81,16 +93,23 @@ class Queries:
         :return: query object for MongoDB
         """
         return {"random_number":
-            {
-                "$gt": lower,
-                "$lt": upper
-            }
-        }
+                {
+                    "$gt": lower,
+                    "$lt": upper
+                }
+                }
+
 
 class DataAccess:
+
     @classmethod
     def sample_control(cls, lower=0, upper=.01, explode=True):
-        df = cls.to_df(col.find(Queries.sample(lower, upper), projection=Projections.all))
+        df = cls.to_df(
+            col.find(
+                Queries.sample(
+                    lower,
+                    upper),
+                projection=Projections.all))
         if explode:
             return ready_made_exploder.fit_transform(df)
         else:
@@ -101,7 +120,11 @@ class DataAccess:
         return pd.DataFrame(list(cursor)).set_index("_id")
 
     @classmethod
-    def get_as_dataframe(cls, find=Queries.no_label, projection=Projections.all, explode=True):
+    def get_as_dataframe(
+            cls,
+            find=Queries.no_label,
+            projection=Projections.all,
+            explode=True):
         df = cls.to_df(col.find(find, projection))
         if explode:
             return ready_made_exploder.fit_transform(df)
@@ -110,14 +133,18 @@ class DataAccess:
 
     @classmethod
     def get_not_labeled(cls):
-        return cls.to_df(col.find(Queries.no_label, Projections.mechanical_turk))
+        return cls.to_df(
+            col.find(
+                Queries.no_label,
+                Projections.mechanical_turk))
 
     @classmethod
     def write_labels(cls, series, column_name):
         for _id, label in series.to_dict().items():
             if isinstance(label, np.int64):
                 label = label.item()
-            col.find_one_and_update({"_id": ObjectId(_id)}, {"$set": {column_name: label}})
+            col.find_one_and_update({"_id": ObjectId(_id)}, {
+                                    "$set": {column_name: label}})
 
     @classmethod
     def write_labels_batch(cls, dataframe):
@@ -125,7 +152,8 @@ class DataAccess:
             for key, value in dict_labels.items():
                 if isinstance(value, np.int64):
                     dict_labels[key] = value.item()
-            col.find_one_and_update({"_id": ObjectId(_id)}, {"$set": dict_labels})
+            col.find_one_and_update({"_id": ObjectId(_id)}, {
+                                    "$set": dict_labels})
 
     @classmethod
     def count_withlabels(cls):

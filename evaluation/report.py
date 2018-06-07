@@ -4,8 +4,13 @@ from sklearn.preprocessing import label_binarize
 import matplotlib.pyplot as plt
 import pickle
 
+
 class ClassificationReporting:
-    metrics = [accuracy_score, f1_score, confusion_matrix, classification_report]
+    metrics = [
+        accuracy_score,
+        f1_score,
+        confusion_matrix,
+        classification_report]
 
     def __init__(self, clf, X, y, cv=False):
         """
@@ -97,13 +102,14 @@ class ClassificationReporting:
                 if metric == f1_score:
                     kwargs["average"] = "weighted"
                 result = metric(y_true=y, y_pred=y_predict, **kwargs)
-                results[metric.__name__] = result.tolist() if hasattr(result, "tolist") else result
+                results[metric.__name__] = result.tolist() if hasattr(
+                    result, "tolist") else result
             self.report[prefix] = results
 
     def set_path(self):
         name_template = "accuracy:{accuracy}|f1:{f1_score}"
         self.report["path"] = name_template.format(
-            #level=self.report["level"],
+            # level=self.report["level"],
             accuracy=self.report["testing_results"]["accuracy_score"],
             f1_score=self.report["testing_results"]["f1_score"],
         )
@@ -125,7 +131,10 @@ class ClassificationReporting:
 
             kf = StratifiedKFold(n_splits=5, random_state=42)
             for i, train, test in enumerate(kf.split(X, y)):
-                probas_ = classifier.fit(self.X[train], self.y[train]).predict_proba(self.X[test])
+                probas_ = classifier.fit(
+                    self.X[train],
+                    self.y[train]).predict_proba(
+                    self.X[test])
                 # Compute ROC curve and area the curve
                 fpr, tpr, thresholds = roc_curve(y[test], probas_[:, 1])
                 tprs.append(interp(mean_fpr, fpr, tpr))
@@ -142,7 +151,6 @@ class ClassificationReporting:
             mean_auc = auc(mean_fpr, mean_tpr)
             std_auc = np.std(aucs)
             std_tpr = np.std(tprs, axis=0)
-
 
             self.report["roc_auc"] = dict(
                 #fpr={str(k): v.tolist() for k, v in fpr.items()},
@@ -192,14 +200,22 @@ class ClassificationReporting:
 
         plt.figure()
 
-        plt.plot(fpr, tpr, label='ROC curve of class {0} (area = {1:0.2f})'.format('0', roc_auc))
+        plt.plot(
+            fpr,
+            tpr,
+            label='ROC curve of class {0} (area = {1:0.2f})'.format(
+                '0',
+                roc_auc))
 
         plt.plot([0, 1], [0, 1], 'k--')
         plt.xlim([0.0, 1.0])
         plt.ylim([0.0, 1.05])
         plt.xlabel('False Positive Rate')
         plt.ylabel('True Positive Rate')
-        plt.title('Receiver operating characteristic for {}'.format(self.report.get("name", "Classifier")))
+        plt.title(
+            'Receiver operating characteristic for {}'.format(
+                self.report.get(
+                    "name", "Classifier")))
         plt.legend(loc="lower right")
         plt.show()
 

@@ -30,12 +30,12 @@ if __name__ == "__main__":
     feature_extractor = get_feature_extractor()
 
     models = [("lr", LogisticRegression(C=0.1, penalty='l2', solver='lbfgs', n_jobs=-1)),
-               ("nb", BernoulliNB(alpha=5.0)),
-               ("rf", RandomForestClassifier(n_estimators=300, max_depth=10, min_samples_split=5, n_jobs=-1)),
-               ("xgb", XGBClassifier(n_estimators=300, max_depth=8, n_jobs=-1)),
-               ("et", ExtraTreesClassifier(n_estimators=300, max_depth=10, min_samples_split=10, n_jobs=-1)),
-               ("svm", SVC(C=100, gamma=0.0001, probability=True)),
-               ("ensemble", ensemble)]
+              ("nb", BernoulliNB(alpha=5.0)),
+              ("rf", RandomForestClassifier(n_estimators=300, max_depth=10, min_samples_split=5, n_jobs=-1)),
+              ("xgb", XGBClassifier(n_estimators=300, max_depth=8, n_jobs=-1)),
+              ("et", ExtraTreesClassifier(n_estimators=300, max_depth=10, min_samples_split=10, n_jobs=-1)),
+              ("svm", SVC(C=100, gamma=0.0001, probability=True)),
+              ("ensemble", ensemble)]
 
     for Xr_train, y_train, Xr_test, y_test, indicator in train_test_data:
         X_train = feature_extractor.fit_transform(Xr_train, y_train)
