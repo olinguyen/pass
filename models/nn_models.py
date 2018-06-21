@@ -1,14 +1,21 @@
 from keras.layers import Dense, Input, LSTM, Embedding, Dropout, Activation, Flatten, concatenate
 from keras.layers import Bidirectional, GlobalMaxPool1D, Convolution1D, MaxPooling1D
 from keras.models import Model, Sequential
+
+import numpy as np
+import os
+
 from nlp.glove import Glove
 
+EMBED_MATRIX_PATH = os.path.join(
+            os.path.dirname(__file__),
+            '../models/embedding_matrix_full.npy')
 
 def get_lstm_model(embedding_matrix=None, maxlen=75):
 
     if embedding_matrix is None:
-        print("Need to pass embedding matrix")
-        return
+        print("Loading embedding_matrix")
+        embedding_matrix = np.load(EMBED_MATRIX_PATH)
 
     embed_size = embedding_matrix.shape[1]
 
@@ -27,7 +34,7 @@ def get_lstm_model(embedding_matrix=None, maxlen=75):
     x = GlobalMaxPool1D()(x)
     x = Dense(50, activation="relu")(x)
     x = Dropout(0.1)(x)
-    x = Dense(3, activation="sigmoid")(x)
+    x = Dense(1, activation="sigmoid")(x)
     model = Model(inputs=inp, outputs=x)
     model.compile(
         loss='binary_crossentropy',
@@ -37,10 +44,10 @@ def get_lstm_model(embedding_matrix=None, maxlen=75):
     return model
 
 
-def get_cnn_model(embedding_matrix, maxlen=75):
+def get_cnn_model(embedding_matrix=None, maxlen=75):
     if embedding_matrix is None:
-        print("Need to pass embedding matrix")
-        return
+        print("Loading embedding_matrix")
+        embedding_matrix = np.load(EMBED_MATRIX_PATH)
 
     embed_size = embedding_matrix.shape[1]
 
@@ -72,7 +79,7 @@ def get_cnn_model(embedding_matrix, maxlen=75):
     model.add(Dense(100))
     model.add(Dropout(0.5))
     model.add(Activation('relu'))
-    model.add(Dense(3))
+    model.add(Dense(1))
     model.add(Activation('sigmoid'))
     model.compile(loss='binary_crossentropy',
                   optimizer='rmsprop',

@@ -1,8 +1,13 @@
-import numpy as np
-from tokenizer import tokenizer
 from sklearn.base import BaseEstimator, TransformerMixin
-from collections import Counter, defaultdict
 from sklearn.feature_extraction.text import TfidfVectorizer
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
+from tokenizer import tokenizer
+
+from collections import Counter, defaultdict
+import numpy as np
+import os
+import pickle
 
 
 class TextCleanExtractor(BaseEstimator, TransformerMixin):
@@ -12,12 +17,14 @@ class TextCleanExtractor(BaseEstimator, TransformerMixin):
                                           preserve_url=False,
                                           preserve_len=False,
                                           preserve_hashes=False,
-                                          preserve_case=False)
+                                          preserve_emoji=False,
+                                          preserve_case=True,
+                                          regularize=True)
 
     def transform(self, X):
         return [' '.join(self.T.tokenize(sentence)) for sentence in X]
 
-    def fit(self, X, y):
+    def fit(self, X, y=None):
         return self
 
     def get_params(self, deep=True):
@@ -33,11 +40,55 @@ class NumWordExtractor(BaseEstimator, TransformerMixin):
         return np.array([len(sentence.split())
                          for sentence in X]).reshape(-1, 1)
 
-    def fit(self, X, y):
+    def fit(self, X, y=None):
         return self
 
     def get_params(self, deep=True):
         return dict()
+
+class TextsToSequences(Tokenizer, BaseEstimator, TransformerMixin):
+    """ Sklearn transformer to convert texts to indices list 
+    (e.g. [["the cute cat"], ["the dog"]] -> [[1, 2, 3], [1, 4]])"""
+    def __init__(self,  **kwargs):
+        super().__init__(**kwargs)
+        
+    def fit(self, texts, y=None):
+        #self.fit_on_texts(texts)
+        word_index_path = os.path.join(
+            os.path.dirname(__file__),
+            '../models/word_index_full.pkl')
+        with open(word_index_path, 'rb') as f:
+            self.word_index = pickle.load(f)
+        return self
+    
+    def transform(self, texts, y=None):
+        return np.array(self.texts_to_sequences(texts))
+
+class Padder(BaseEstimator, TransformerMixin):
+    """ Pad and crop uneven lists to the same length. 
+    Only the end of lists longernthan the maxlen attribute are
+    kept, and lists shorter than maxlen are left-padded with zeros
+    
+    Attributes
+    ----------
+    maxlen: int
+        sizes of sequences after padding
+    max_index: int
+        maximum index known by the Padder, if a higher index is met during 
+        transform it is transformed to a 0
+    """
+    def __init__(self, maxlen=500):
+        self.maxlen = maxlen
+        self.max_index = None
+        
+    def fit(self, X, y=None):
+        self.max_index = pad_sequences(X, maxlen=self.maxlen).max()
+        return self
+    
+    def transform(self, X, y=None):
+        X = pad_sequences(X, maxlen=self.maxlen)
+        X[X > self.max_index] = 0
+        return X
 
 
 class AverageWordLengthExtractor(BaseEstimator, TransformerMixin):
@@ -53,7 +104,7 @@ class AverageWordLengthExtractor(BaseEstimator, TransformerMixin):
         return np.array([self.average_word_length(sentence.split())
                          for sentence in X]).reshape(-1, 1)
 
-    def fit(self, X, y):
+    def fit(self, X, y=None):
         return self
 
     def get_params(self, deep=True):
@@ -68,7 +119,7 @@ class CharLengthExtractor(BaseEstimator, TransformerMixin):
     def transform(self, X):
         return np.array([len(sentence) for sentence in X]).reshape(-1, 1)
 
-    def fit(self, X, y):
+    def fit(self, X, y=None):
         return self
 
     def get_params(self, deep=True):
@@ -84,7 +135,7 @@ class NumUniqueWordExtractor(BaseEstimator, TransformerMixin):
         return np.array([len(Counter(sentence.split()))
                          for sentence in X]).reshape(-1, 1)
 
-    def fit(self, X, y):
+    def fit(self, X, y=None):
         return self
 
     def get_params(self, deep=True):
@@ -124,7 +175,7 @@ class MeanEmbeddingVectorizer(object):
         # with the same dimensionality as all the other vectors
         self.dim = len(next(iter(self.word2vec.values())))
 
-    def fit(self, X, y):
+    def fit(self, X, y=None):
         return self
 
     def transform(self, X):
@@ -150,20 +201,15 @@ class TfidfEmbeddingVectorizer(object):
             self.dim = len(next(iter(self.word2vec.values())))
         else:
             self.dim = 0
-        self.tfidf = tfidf
 
-    def fit(self, X, y):
-        if self.tfidf is None:
-            self.tfidf = TfidfVectorizer(  # ngram_range=(1,4),
-                lowercase=True,
-                analyzer='word',
-                # tokenizer=tokenize,
-                # stop_words='english'
-            )
-        # self.tfidf.fit(X)
+    def fit(self, X, y=None):
+        self.tfidf = TfidfVectorizer(analyzer=lambda x: x)
+        self.tfidf.fit(X)
+
         # if a word was never seen - it must be at least as infrequent
         # as any of the known words - so the default idf is the max of
         # known idf's
+        #print(self.tfidf.idf_.shape)
         max_idf = max(self.tfidf.idf_)
         self.word2weight = defaultdict(
             lambda: max_idf, [

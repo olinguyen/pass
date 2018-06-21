@@ -38,6 +38,30 @@ class Glove(WordEmbedding):
         print('Found %s word vectors.' % len(w2v))
         return instance
 
+    @staticmethod
+    def get_embedding_matrix_static(
+            w2v,
+            tokenizer,
+            max_features=20000,
+            embed_size=200):
+        all_embs = np.stack(w2v.values())
+        emb_mean, emb_std = all_embs.mean(), all_embs.std()
+
+        word_index = tokenizer.word_index
+        nb_words = min(max_features, len(word_index))
+
+        embedding_matrix = np.random.normal(
+            emb_mean, emb_std, (nb_words + 1, embed_size))
+        for word, i in word_index.items():
+            if i >= max_features:
+                continue
+            embedding_vector = w2v.get(word)
+            if embedding_vector is not None:
+                embedding_matrix[i] = embedding_vector
+
+        return embedding_matrix
+    
+
     def get_embedding_matrix(
             self,
             tokenizer,

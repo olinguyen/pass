@@ -22,6 +22,7 @@ def get_features(w2v=None):
                                   max_df=0.9,
                                   strip_accents='unicode',
                                   use_idf=True,
+                                  norm='l2',
                                   sublinear_tf=True)
 
     tfidf_chars = TfidfVectorizer(ngram_range=(1, 4),
@@ -31,6 +32,7 @@ def get_features(w2v=None):
                                   min_df=3,
                                   max_df=0.9,
                                   use_idf=True,
+                                  norm='l2',
                                   sublinear_tf=True)
 
     if not w2v:
@@ -56,13 +58,14 @@ def get_features(w2v=None):
                 # TF-IDF over tokens
                 ('tfidf_token_ngrams', tfidf_words),
                 # TF-IDF over characters
-                ('tfidf_token_chars', tfidf_chars)])),
+                ('tfidf_token_chars', tfidf_chars)
+                ])),
 
             ("nbf", NBFeaturer(alpha=10))
         ])),
 
         # Averaged word embedding, weighted by tfidf
-        ('w2v', TfidfEmbeddingVectorizer(w2v, tfidf_words))
+        ('w2v', TfidfEmbeddingVectorizer(w2v))
 
         # Averaged word embedding
         #('w2v', MeanEmbeddingVectorizer(w2v))
