@@ -10,6 +10,8 @@ from sklearn.preprocessing import PolynomialFeatures, Normalizer, StandardScaler
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.wrappers.scikit_learn import KerasClassifier
+from keras import callbacks
+
 
 from xgboost import XGBClassifier
 
@@ -97,6 +99,9 @@ def get_basic_model(model, w2v=None):
 def get_keras_model(model):
     vocab_size = 20000
     maxlen = 75
+    epochs = 10
+
+    #early_stopping = callbacks.EarlyStopping(monitor='loss', patience=1, verbose=0, mode='auto')
 
     sequencer = TextsToSequences(num_words=vocab_size)
     padder = Padder(maxlen)
@@ -105,8 +110,12 @@ def get_keras_model(model):
               ("sequencer", sequencer),
               ("padder", padder),
               ("classifier", KerasClassifier(build_fn=model,
-                                             epochs=5,
-                                             batch_size=256))])
+                                             epochs=epochs,
+                                             #validation_split=0.20,
+                                             batch_size=256,
+                                             #callbacks=[callback],
+                                             verbose=1,
+                                             ))])
 
 if __name__ == "__main__":
     print("Pipelines...")
