@@ -1,4 +1,5 @@
 import os
+import re
 from feature_extraction.transformers import *
 from feature_extraction.nbsvm import NBFeaturer
 from nltk.tokenize import TweetTokenizer
@@ -11,12 +12,15 @@ nltk_tokenizer = TweetTokenizer(
     reduce_len=True,
     preserve_case=False)
 
+def tokenize(s):
+    return re.sub("(@[A-Za-z0-9]+)|([^0-9A-Za-z \t])|(\w+:\'\"\/\/\S+)"," ", s).split()
+
 
 def get_features(w2v=None):
     tfidf_words = TfidfVectorizer(ngram_range=(1, 4),
                                   max_features=5000,
                                   lowercase=True,
-                                  tokenizer=nltk_tokenizer.tokenize,
+                                  tokenizer=tokenize,
                                   stop_words='english',
                                   min_df=3,
                                   max_df=0.9,

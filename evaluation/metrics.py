@@ -30,19 +30,27 @@ class RocAucEvaluation(Callback):
 def class_report(conf_mat):
     tp, fp, fn, tn = conf_mat.flatten()
     measures = {}
-    measures['accuracy'] = (tp + tn) / (tp + fp + fn + tn)
-    measures['specificity'] = tn / (tn + fp)        # (true negative rate)
+    measures['test_accuracy'] = (tp + tn) / (tp + fp + fn + tn)
+    #measures['specificity'] = tn / (tn + fp)        # (true negative rate)
     # (recall, true positive rate)
-    measures['sensitivity'] = tp / (tp + fn)
-    measures['precision'] = tp / (tp + fp)
-    measures['f1score'] = 2 * tp / (2 * tp + fp + fn)
+    measures['test_recall'] = tp / (tp + fn)
+    measures['test_precision'] = tp / (tp + fp)
+    measures['test_f1score'] = 2 * tp / (2 * tp + fp + fn)
     return measures
 
 def class_report_binary(y_test, y_scores):
     y_pred = (y_scores[:, 1] >= 0.50).astype(int)
-    conf_mat = confusion_matrix(y_test, y_pred)
-    measures = class_report(conf_mat)
-    print("done")
+    #conf_mat = confusion_matrix(y_test, y_pred)
+    #measures = class_report(conf_mat)
+    measures = {}
+    score = roc_auc_score(y_test, y_scores[:, 1])
+    precision, recall, fscore, support = precision_recall_fscore_support(y_test, y_pred)
+    acc = accuracy_score(y_test, y_pred)
+    measures['test_roc_auc'] = score
+    measures['test_accuracy'] = acc
+    measures['test_f1score'] = fscore[1]
+    measures['test_precision'] = precision[1]
+    measures['test_recall'] = recall[1]
     return measures
 
 def class_report_multilabel(y_test, y_scores, verbose=True, combined=False):

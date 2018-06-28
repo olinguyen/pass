@@ -46,23 +46,23 @@ if __name__ == "__main__":
     ensemble = get_ensemble_model(w2v)
     #ensemble.steps = ensemble.steps[2:]
     feature_extractor = get_feature_extractor(w2v)
-    n_jobs = 8
+    n_jobs = 12
 
     cols_target = ['label_pa', 'label_sb', 'label_sleep']
 
-    models = [#("lr", LogisticRegression(C=0.1, penalty='l2', solver='lbfgs', n_jobs=n_jobs)),
-#              ("nb", BernoulliNB(alpha=5.0)),
-#              ("rf", RandomForestClassifier(n_estimators=300,
-#                                             max_depth=10,
-#                                             min_samples_split=5,
-#                                             n_jobs=n_jobs)),
-#              ("xgb", XGBClassifier(n_estimators=150,
-#                                     max_depth=8,
-#                                     n_jobs=n_jobs)),
-#              ("ensemble", ensemble),
-              #("svm", SVC(C=100, gamma=0.0001, probability=True)),
-              ("nn_lstm", get_keras_model(get_lstm_model)),
-              ("nn_cnn", get_keras_model(get_cnn_model)),
+    models = [("lr", LogisticRegression(C=0.1, penalty='l2', solver='lbfgs', n_jobs=n_jobs)),
+              ("nb", BernoulliNB(alpha=5.0)),
+              ("rf", RandomForestClassifier(n_estimators=300,
+                                             max_depth=10,
+                                             min_samples_split=5,
+                                             n_jobs=n_jobs)),
+              ("xgb", XGBClassifier(n_estimators=150,
+                                     max_depth=8,
+                                     n_jobs=n_jobs)),
+              ("ensemble", ensemble),
+              ("svm", SVC(C=100, gamma=0.0001, probability=True)),
+              #("nn_lstm", get_keras_model(get_lstm_model)),
+              #("nn_cnn", get_keras_model(get_cnn_model)),
              ]
 
     skf = StratifiedKFold(n_splits=5, random_state=42)

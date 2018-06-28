@@ -203,7 +203,7 @@ class TfidfEmbeddingVectorizer(object):
             self.dim = 0
 
     def fit(self, X, y=None):
-        self.tfidf = TfidfVectorizer(analyzer=lambda x: x)
+        self.tfidf = TfidfVectorizer(analyzer=lambda x: x, stop_words='english')
         self.tfidf.fit(X)
 
         # if a word was never seen - it must be at least as infrequent

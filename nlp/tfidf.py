@@ -47,6 +47,7 @@ def plot_tfidf_classfeats_h(dfs):
     ''' Plot the data frames returned by the function plot_tfidf_classfeats(). '''
     fig = plt.figure(figsize=(16, 9), facecolor="w")
     x = np.arange(len(dfs[0]))
+    indicators = ["Physical activity", "Sedentary behaviour", "Sleep"]
     for i, df in enumerate(dfs):
         ax = fig.add_subplot(1, len(dfs), i + 1)
         ax.spines["top"].set_visible(False)
@@ -54,12 +55,13 @@ def plot_tfidf_classfeats_h(dfs):
         ax.set_frame_on(False)
         ax.get_xaxis().tick_bottom()
         ax.get_yaxis().tick_left()
-        ax.set_xlabel("Mean Tf-Idf Score", labelpad=16, fontsize=14)
-        ax.set_title("label = " + str(df.label), fontsize=16)
+        ax.set_xlabel("Mean Tf-Idf Score", labelpad=16, fontsize=16)
+        ax.set_title(str(indicators[i]), fontsize=18)
         ax.ticklabel_format(axis='x', style='sci', scilimits=(-2, 2))
         ax.barh(x, df.tfidf, align='center', color='#3F5D7D')
         ax.set_yticks(x)
         ax.set_ylim([-1, x[-1] + 1])
+        ax.xaxis.label.set_size(16)
         yticks = ax.set_yticklabels(df.feature)
         plt.subplots_adjust(
             bottom=0.09,
@@ -67,4 +69,6 @@ def plot_tfidf_classfeats_h(dfs):
             left=0.15,
             top=0.95,
             wspace=0.52)
+    plt.rcParams['ytick.labelsize'] = 14
+    plt.rcParams['xtick.labelsize'] = 14
     plt.show()
